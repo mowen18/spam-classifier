@@ -16,7 +16,8 @@ This project compares a focused set of supervised text classifiers, selects the 
 - TF-IDF vectorization inside every model-selection pipeline
 - Model selection by spam-class F1 rather than accuracy alone
 - Final holdout evaluation with precision, recall, F1, average precision, balanced accuracy, accuracy, and confusion matrix
-- Lightweight tests for data and modeling helpers
+- Training-only decision-threshold analysis for the selected `LinearSVC` operating point
+- Lightweight tests for data, modeling, and evaluation helpers
 
 ## Dataset
 
@@ -36,7 +37,7 @@ The executed workflow loaded 5,572 raw rows from `data/raw/SMSSpamCollection`, r
 
 The notebook uses a single stratified 80/20 train/test split with `random_state=42`. Model selection is performed only on the training set using five-fold `StratifiedKFold` with shuffling. `TfidfVectorizer` is inside each scikit-learn `Pipeline`, so vocabulary and IDF weights are learned within each cross-validation fold.
 
-The test set is used once after selecting the final model and hyperparameters.
+The test set is used once after selecting the final model and hyperparameters. Decision-threshold analysis also uses training-only out-of-fold `LinearSVC` decision scores before evaluating any alternative operating point on the holdout set.
 
 ## Model Comparison
 
@@ -65,6 +66,19 @@ Holdout average precision was 0.973. The final confusion matrix had 892 true ham
 
 ![Confusion matrix](images/confusion_matrix.png)
 
+## Decision-Threshold Analysis
+
+`LinearSVC` uses signed decision scores, not probabilities. Its default decision threshold is `0`; scores above `0` are labeled spam. After the model and hyperparameters were selected, training-only out-of-fold scores selected an alternative threshold of -0.0146 by maximizing spam F1, with ties broken by higher spam recall and then closeness to `0`.
+
+| Operating point | Threshold | Holdout spam precision | Holdout spam recall | Holdout spam F1 | False positives | False negatives |
+|---|---:|---:|---:|---:|---:|---:|
+| Default `LinearSVC` threshold | 0.000 | 0.915 | 0.908 | 0.912 | 11 | 12 |
+| Training-selected threshold | -0.015 | 0.908 | 0.908 | 0.908 | 12 | 12 |
+
+![Threshold tradeoff](images/threshold_tradeoff.png)
+
+The selected threshold is an additional operating-point analysis, not a replacement for the primary default-threshold result. In this executed run, the training-selected threshold slightly improved training out-of-fold spam F1 but did not improve holdout spam F1.
+
 ## Key Findings
 
 LinearSVC had the strongest cross-validated spam F1 among the focused candidate set. Logistic regression and MultinomialNB were close, which is useful context: the final result is not dependent on a large or fragile model zoo. The holdout errors show that some promotional or short messages remain difficult, so the notebook discusses false positives and false negatives cautiously.
@@ -82,6 +96,7 @@ images/
   class_distribution.png
   model_comparison.png
   confusion_matrix.png
+  threshold_tradeoff.png
 notebooks/
   01_sms_spam_classification.ipynb
 src/
@@ -93,6 +108,7 @@ src/
 tests/
   test_data.py
   test_modeling.py
+  test_threshold_evaluation.py
 ```
 
 ## Setup
@@ -131,13 +147,14 @@ python -m pytest -q
 - The dataset is historical and relatively small.
 - Language, geography, and collection-period biases may affect results.
 - Spam vocabulary and delivery patterns evolve over time.
+- The training-selected threshold is based on this historical dataset and would need validation on current messaging traffic before use.
 - These results should not be assumed to transfer directly to modern messaging traffic without fresh validation.
 - The project is a notebook-centered ML analysis, not a production spam-filtering system.
 
 ## Possible Future Improvements
 
 - Evaluate on newer SMS or messaging datasets with documented provenance.
-- Add threshold analysis for spam recall versus false-positive tradeoffs.
+- Validate candidate operating thresholds on newer messaging traffic.
 - Compare calibrated linear models when probability estimates are required.
 - Expand error analysis with human-reviewed categories for common false positives and false negatives.
 
