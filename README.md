@@ -147,9 +147,6 @@ python -m pytest -q
 - The dataset is historical and relatively small.
 - Language, geography, and collection-period biases may affect results.
 - Spam vocabulary and delivery patterns evolve over time.
-- The training-selected threshold is based on this historical dataset and would need validation on current messaging traffic before use.
-- These results should not be assumed to transfer directly to modern messaging traffic without fresh validation.
-- The project is a notebook-centered ML analysis, not a production spam-filtering system.
 
 ## Possible Future Improvements
 
