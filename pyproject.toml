@@ -7,7 +7,7 @@ name = "sms-spam-classifier"
 version = "0.1.0"
 description = "A reproducible classical NLP workflow for SMS spam classification."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
     "jupyter",
     "matplotlib",
