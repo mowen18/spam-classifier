@@ -1,5 +1,7 @@
 # SMS Spam Classifier
 
+[![CI](https://github.com/mowen18/spam-classifier/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/mowen18/spam-classifier/actions/workflows/ci.yml)
+
 A classical NLP project for SMS spam classification using the UCI SMS Spam Collection. The workflow emphasizes reproducible data loading, responsible duplicate handling, leakage-safe model selection, sparse TF-IDF features, class-sensitive evaluation, and a final holdout test.
 
 ## Project Overview
